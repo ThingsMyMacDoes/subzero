@@ -1,5 +1,5 @@
 let diagramData = "graph TD\n"; // Initialize diagram data
-let lastMachine = ""; // Keep track of the last machine for connections
+let currentNodes = []; // To track the last created nodes (outputs or machine)
 
 function addMachine() {
     const machineName = document.getElementById("machineName").value;
@@ -15,21 +15,24 @@ function addMachine() {
     // Add machine node
     diagramData += `${machineName}[${machineName}: ${inputMaterial}]\n`;
 
-    // Connect to previous machine if applicable
-    if (lastMachine) {
-        diagramData += `${lastMachine} --> ${machineName}\n`;
-    }
+    // Connect to all current nodes (outputs from the previous step)
+    currentNodes.forEach(node => {
+        diagramData += `${node} --> ${machineName}\n`;
+    });
 
-    // Add outputs
+    // Add outputs and update current nodes
+    currentNodes = [];
     outputDetails.forEach((output, index) => {
         const outputNode = `${machineName}_output${index + 1}[${output}]`;
         diagramData += `${machineName} --> ${outputNode}\n`;
+        currentNodes.push(outputNode); // Save output nodes as potential new inputs
     });
-
-    lastMachine = machineName; // Update last machine
 
     // Render the diagram
     renderDiagram();
+
+    // Clear form inputs
+    document.getElementById("machineForm").reset();
 }
 
 function renderDiagram() {
