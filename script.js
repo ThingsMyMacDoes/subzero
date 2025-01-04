@@ -98,6 +98,16 @@ function updateNodeSelector() {
 // Renders the diagram
 function renderDiagram() {
     const diagramContainer = document.getElementById("diagram");
-    diagramContainer.innerHTML = diagramData;
+
+    // Clear existing content
+    diagramContainer.innerHTML = "";
+
+    // Reinsert updated Mermaid diagram
+    diagramContainer.innerHTML = `<div class="mermaid">${diagramData}</div>`;
+
+    // Debugging output (optional)
+    console.log("Rendering Diagram with Data:", diagramData);
+
+    // Reinitialize Mermaid
     mermaid.init(undefined, diagramContainer);
 }
