@@ -17,10 +17,12 @@ function addMachine() {
     const machineNode = `${machineName}[${machineName}: ${inputMaterial}]:::clickable\n`;
     diagramData += machineNode;
 
-    // Connect to previous nodes
-    currentNodes.forEach(prevNode => {
-        diagramData += `${prevNode} --> ${machineName}\n`;
-    });
+    // Connect to current nodes (outputs of the previous machine)
+    if (currentNodes.length > 0) {
+        currentNodes.forEach(node => {
+            diagramData += `${node} --> ${machineName}\n`;
+        });
+    }
 
     // Reset currentNodes and add new outputs
     currentNodes = [];
@@ -58,15 +60,18 @@ function handleNodeClick(nodeId, material) {
     diagramData += newMachineNode;
 
     // Add outputs for the new machine
-    currentNodes = []; // Reset current nodes for the new outputs
+    const newOutputNodes = [];
     outputDetails.forEach((output, index) => {
         const outputNode = `${machineName}_output${index + 1}[${output}]:::clickable\n`;
         diagramData += `${machineName} --> ${outputNode}\n`;
-        currentNodes.push(outputNode); // Update current nodes
+        newOutputNodes.push(outputNode);
 
         // Register click handler for the new output node
         nodeHandlers[outputNode] = () => handleNodeClick(outputNode, output);
     });
+
+    // Update currentNodes to include only the new outputs
+    currentNodes = newOutputNodes;
 
     // Render the updated diagram
     renderDiagram();
