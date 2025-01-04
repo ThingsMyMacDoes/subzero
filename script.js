@@ -39,11 +39,17 @@ function addFirstMachine() {
 // Handles clicking a node
 function handleNodeClick(nodeId, inputMaterial) {
     const newMachineName = prompt("Enter the new machine name:", "");
-    const numOutputs = parseInt(prompt("Enter the number of outputs:", ""));
-    const outputDetails = prompt("Enter the output details (comma-separated):", "").split(",").map(o => o.trim());
+    if (!newMachineName) return;
 
-    if (!newMachineName || outputDetails.length !== numOutputs) {
-        alert("Invalid inputs!");
+    const numOutputs = parseInt(prompt("Enter the number of outputs:", ""));
+    if (isNaN(numOutputs) || numOutputs < 1) {
+        alert("Invalid number of outputs!");
+        return;
+    }
+
+    const outputDetails = prompt("Enter the output details (comma-separated):", "").split(",").map(o => o.trim());
+    if (outputDetails.length !== numOutputs) {
+        alert("The number of outputs does not match the output details!");
         return;
     }
 
