@@ -1,6 +1,5 @@
 let diagramData = "graph TD\n"; // Initialize Mermaid graph data
-let nodeHandlers = {}; // Stores click handlers for each node
-let lastNodeId = null; // Track the last added node ID
+let nodeList = []; // List of all output nodes
 
 // Adds the first machine to the diagram
 function addFirstMachine() {
@@ -17,77 +16,88 @@ function addFirstMachine() {
     // Add the first machine node
     const machineNodeId = machineName;
     const machineNodeLabel = `${machineName}: ${inputMaterial}`;
-    diagramData += `${machineNodeId}[${machineNodeLabel}]:::clickable\n`;
+    diagramData += `${machineNodeId}[${machineNodeLabel}]\n`;
 
     // Add outputs
     outputDetails.forEach((output, index) => {
         const outputNodeId = `${machineNodeId}_output${index + 1}`;
         const outputNodeLabel = `${machineName}: ${inputMaterial} → ${output}`;
-        diagramData += `${machineNodeId} --> ${outputNodeId}[${outputNodeLabel}]:::clickable\n`;
+        diagramData += `${machineNodeId} --> ${outputNodeId}[${outputNodeLabel}]\n`;
 
-        // Register click handler for the output node
-        nodeHandlers[outputNodeId] = () => handleNodeClick(outputNodeId, output);
+        // Add output node to the dropdown list
+        nodeList.push({ id: outputNodeId, label: outputNodeLabel });
     });
 
-    lastNodeId = machineNodeId; // Set last added node
     renderDiagram();
+    updateNodeSelector();
+
+    // Show the add-machine section for subsequent machines
+    document.getElementById("addMachineSection").style.display = "block";
 
     // Clear form inputs
     document.getElementById("machineForm").reset();
 }
 
-// Handles clicking a node
-function handleNodeClick(nodeId, inputMaterial) {
-    const newMachineName = prompt("Enter the new machine name:", "");
-    if (!newMachineName) return;
+// Adds a machine to a selected output node
+function addMachineToNode() {
+    const selectedNode = document.getElementById("nodeSelector").value;
+    const newMachineName = document.getElementById("newMachineName").value.trim();
+    const numOutputs = parseInt(document.getElementById("newNumOutputs").value);
+    const outputDetails = document.getElementById("newOutputDetails").value.split(",").map(o => o.trim());
 
-    const numOutputs = parseInt(prompt("Enter the number of outputs:", ""));
-    if (isNaN(numOutputs) || numOutputs < 1) {
-        alert("Invalid number of outputs!");
+    if (!selectedNode) {
+        alert("Please select a node to connect!");
         return;
     }
 
-    const outputDetails = prompt("Enter the output details (comma-separated):", "").split(",").map(o => o.trim());
-    if (outputDetails.length !== numOutputs) {
-        alert("The number of outputs does not match the output details!");
+    if (!newMachineName || outputDetails.length !== numOutputs) {
+        alert("Invalid inputs!");
         return;
     }
 
-    // Create the new machine node
+    // Get the input material from the selected node
+    const inputMaterial = nodeList.find(node => node.id === selectedNode).label.split("→")[1].trim();
+
+    // Add the new machine node
     const newMachineNodeId = newMachineName;
     const newMachineNodeLabel = `${newMachineName}: ${inputMaterial}`;
-    diagramData += `${nodeId} --> ${newMachineNodeId}[${newMachineNodeLabel}]:::clickable\n`;
+    diagramData += `${selectedNode} --> ${newMachineNodeId}[${newMachineNodeLabel}]\n`;
 
     // Add outputs for the new machine
     outputDetails.forEach((output, index) => {
-        const newOutputNodeId = `${newMachineNodeId}_output${index + 1}`;
-        const newOutputNodeLabel = `${newMachineName}: ${inputMaterial} → ${output}`;
-        diagramData += `${newMachineNodeId} --> ${newOutputNodeId}[${newOutputNodeLabel}]:::clickable\n`;
+        const outputNodeId = `${newMachineNodeId}_output${index + 1}`;
+        const outputNodeLabel = `${newMachineName}: ${inputMaterial} → ${output}`;
+        diagramData += `${newMachineNodeId} --> ${outputNodeId}[${outputNodeLabel}]\n`;
 
-        // Register a click handler for the new output node
-        nodeHandlers[newOutputNodeId] = () => handleNodeClick(newOutputNodeId, output);
+        // Add output node to the dropdown list
+        nodeList.push({ id: outputNodeId, label: outputNodeLabel });
     });
 
     renderDiagram();
+    updateNodeSelector();
+
+    // Clear form inputs
+    document.getElementById("newMachineName").value = "";
+    document.getElementById("newNumOutputs").value = "";
+    document.getElementById("newOutputDetails").value = "";
 }
 
-// Renders the diagram and attaches click handlers
+// Updates the node dropdown with all available output nodes
+function updateNodeSelector() {
+    const nodeSelector = document.getElementById("nodeSelector");
+    nodeSelector.innerHTML = ""; // Clear previous options
+
+    nodeList.forEach(node => {
+        const option = document.createElement("option");
+        option.value = node.id;
+        option.textContent = node.label;
+        nodeSelector.appendChild(option);
+    });
+}
+
+// Renders the diagram
 function renderDiagram() {
     const diagramContainer = document.getElementById("diagram");
     diagramContainer.innerHTML = diagramData;
     mermaid.init(undefined, diagramContainer);
-
-    // Attach click handlers to nodes
-    setTimeout(() => {
-        Object.keys(nodeHandlers).forEach(nodeId => {
-            const nodeElement = document.querySelector(`[id*="${nodeId}"]`);
-            if (nodeElement) {
-                nodeElement.style.cursor = "pointer";
-                nodeElement.onclick = () => {
-                    nodeElement.style.fill = "#ffcccb"; // Change color
-                    nodeHandlers[nodeId](); // Trigger the node handler
-                };
-            }
-        });
-    }, 500); // Delay to allow Mermaid rendering
 }
