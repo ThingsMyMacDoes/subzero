@@ -1,5 +1,4 @@
-let diagramData = "graph TD\n"; // Initialize diagram data
-let currentNodes = []; // Track the last created nodes (outputs or machines)
+let diagramData = "graph TD\n"; // Initialize diagram data with a newline
 let nodeHandlers = {}; // Store click handlers for each node
 
 function addMachine() {
@@ -14,15 +13,14 @@ function addMachine() {
     }
 
     // Add machine node with clickable class
-    const machineNode = `${machineName}[${machineName}: ${inputMaterial}]:::clickable`;
-    diagramData += `${machineNode}\n`;
+    const machineNode = `${machineName}[${machineName}: ${inputMaterial}]:::clickable\n`;
+    diagramData += machineNode;
 
-    // Add outputs and update current nodes
-    currentNodes = [];
+    // Add outputs
     outputDetails.forEach((output, index) => {
-        const outputNode = `${machineName}_output${index + 1}[${output}]:::clickable`;
-        diagramData += `${machineName} --> ${outputNode}\n`;
-        currentNodes.push(outputNode); // Save output nodes as potential new inputs
+        const outputNode = `${machineName}_output${index + 1}[${output}]:::clickable\n`;
+        diagramData += `${machineName} --> ${outputNode}`;
+        diagramData += "\n"; // Add newline for Mermaid compatibility
 
         // Register click handler for the output node
         nodeHandlers[outputNode] = () => handleNodeClick(outputNode);
@@ -36,7 +34,7 @@ function addMachine() {
 }
 
 function handleNodeClick(nodeId) {
-    const clickedNode = nodeId.split("[")[0]; // Get the node identifier
+    const clickedNode = nodeId.split("[")[0]; // Extract the node identifier
     const machineName = prompt("Enter the new machine name for this node:");
     const inputMaterial = prompt("Enter the input material for this machine:");
     const numOutputs = parseInt(prompt("Enter the number of outputs:"));
@@ -48,12 +46,13 @@ function handleNodeClick(nodeId) {
     }
 
     // Add the new machine node
-    const newMachineNode = `${machineName}[${machineName}: ${inputMaterial}]:::clickable`;
-    diagramData += `${clickedNode} --> ${newMachineNode}\n`;
+    const newMachineNode = `${machineName}[${machineName}: ${inputMaterial}]:::clickable\n`;
+    diagramData += `${clickedNode} --> ${machineName}\n`;
+    diagramData += newMachineNode;
 
     // Add outputs for the new machine
     outputDetails.forEach((output, index) => {
-        const outputNode = `${machineName}_output${index + 1}[${output}]:::clickable`;
+        const outputNode = `${machineName}_output${index + 1}[${output}]:::clickable\n`;
         diagramData += `${machineName} --> ${outputNode}\n`;
 
         // Register click handler for the new output node
@@ -66,10 +65,10 @@ function handleNodeClick(nodeId) {
 
 function renderDiagram() {
     const diagramContainer = document.getElementById("diagram");
-    diagramContainer.innerHTML = diagramData;
-    mermaid.init(undefined, diagramContainer);
+    diagramContainer.innerHTML = diagramData; // Inject the updated diagram data
+    mermaid.init(undefined, diagramContainer); // Reinitialize Mermaid
 
-    // Add click handlers to the rendered nodes
+    // Attach click handlers to rendered nodes
     Object.keys(nodeHandlers).forEach(nodeId => {
         const nodeElement = document.querySelector(`[id*="${nodeId.split("[")[0]}"]`);
         if (nodeElement) {
