@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine Diagram</title>
+    <title>Dynamic Machine Flowchart</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>
         mermaid.initialize({ startOnLoad: false });
     </script>
 </head>
 <body>
-    <h1>Machine Diagram</h1>
+    <h1>Dynamic Machine Flowchart</h1>
     <form id="machineForm">
         <label>Machine Name:</label>
         <input type="text" id="machineName" required><br>
@@ -20,7 +20,7 @@
         <input type="number" id="numOutputs" min="1" required><br>
         <label>Output Details (comma-separated):</label>
         <input type="text" id="outputDetails" required><br>
-        <button type="button" onclick="drawMachine()">Draw Machine</button>
+        <button type="button" onclick="addFirstMachine()">Add First Machine</button>
     </form>
     <div class="mermaid" id="diagram">
         graph TD
