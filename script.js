@@ -1,5 +1,6 @@
 let diagramData = "graph TD\n"; // Initialize diagram data with a newline
 let nodeHandlers = {}; // Store click handlers for each node
+let currentNodes = []; // Track output nodes for the next machine
 
 function addMachine() {
     const machineName = document.getElementById("machineName").value;
@@ -16,14 +17,21 @@ function addMachine() {
     const machineNode = `${machineName}[${machineName}: ${inputMaterial}]:::clickable\n`;
     diagramData += machineNode;
 
-    // Add outputs
+    // Connect to all current nodes (outputs from the previous step)
+    currentNodes.forEach(node => {
+        diagramData += `${node} --> ${machineName}\n`;
+    });
+
+    // Add outputs and update current nodes
+    currentNodes = [];
     outputDetails.forEach((output, index) => {
         const outputNode = `${machineName}_output${index + 1}[${output}]:::clickable\n`;
         diagramData += `${machineName} --> ${outputNode}`;
         diagramData += "\n"; // Add newline for Mermaid compatibility
+        currentNodes.push(outputNode); // Save output nodes as potential inputs
 
         // Register click handler for the output node
-        nodeHandlers[outputNode] = () => handleNodeClick(outputNode);
+        nodeHandlers[outputNode] = () => handleNodeClick(outputNode, output);
     });
 
     // Render the diagram
@@ -33,11 +41,10 @@ function addMachine() {
     document.getElementById("machineForm").reset();
 }
 
-function handleNodeClick(nodeId) {
+function handleNodeClick(nodeId, material) {
     const clickedNode = nodeId.split("[")[0]; // Extract the node identifier
     const machineName = prompt("Enter the new machine name for this node:");
-    const inputMaterial = prompt("Enter the input material for this machine:");
-    const numOutputs = parseInt(prompt("Enter the number of outputs:"));
+    const numOutputs = parseInt(prompt(`Enter the number of outputs for ${machineName}:`));
     const outputDetails = prompt("Enter the output details (comma-separated):").split(",");
 
     if (outputDetails.length !== numOutputs) {
@@ -46,17 +53,19 @@ function handleNodeClick(nodeId) {
     }
 
     // Add the new machine node
-    const newMachineNode = `${machineName}[${machineName}: ${inputMaterial}]:::clickable\n`;
+    const newMachineNode = `${machineName}[${machineName}: ${material}]:::clickable\n`;
     diagramData += `${clickedNode} --> ${machineName}\n`;
     diagramData += newMachineNode;
 
     // Add outputs for the new machine
+    currentNodes = []; // Reset current nodes for the new outputs
     outputDetails.forEach((output, index) => {
         const outputNode = `${machineName}_output${index + 1}[${output}]:::clickable\n`;
         diagramData += `${machineName} --> ${outputNode}\n`;
+        currentNodes.push(outputNode); // Update current nodes
 
         // Register click handler for the new output node
-        nodeHandlers[outputNode] = () => handleNodeClick(outputNode);
+        nodeHandlers[outputNode] = () => handleNodeClick(outputNode, output);
     });
 
     // Render the updated diagram
