@@ -1,36 +1,132 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Waste Processing Flowchart</title>
-  <script src="https://cdn.jsdelivr.net/npm/diagram-js/dist/diagram.min.js"></script>
-  <style>
-    #canvas {
-      width: 100%;
-      height: 500px;
-      border: 1px solid #ccc;
-    }
-    form {
-      margin-bottom: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mixed Waste Sorting Line</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input, button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+        }
+        .navigation {
+            margin-top: 20px;
+        }
+        .navigation a {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Waste Processing Plant Flowchart</h1>
-  <form id="machineForm">
-    <label for="machineName">Machine Name:</label>
-    <input type="text" id="machineName" required><br><br>
-    <label for="numOutputs">Number of Outputs:</label>
-    <input type="number" id="numOutputs" min="1" required><br><br>
-    <label for="outputTypes">Output Types (comma-separated):</label>
-    <input type="text" id="outputTypes" required><br><br>
-    <button type="submit">Create Machine</button>
-  </form>
+    <div class="container">
+        <h1>Mixed Waste Sorting Line</h1>
+        <form id="sortingLineForm">
+            <label for="machineName">Machine Name:</label>
+            <input type="text" id="machineName" name="machineName" required>
 
-  <div id="canvas"></div>
+            <label for="inputMaterial">Input Material:</label>
+            <input type="text" id="inputMaterial" name="inputMaterial" required>
 
-  <script src="script.js"></script>
+            <label for="numOutputs">Number of Outputs:</label>
+            <input type="number" id="numOutputs" name="numOutputs" required min="1">
+
+            <label for="outputType">Output Type:</label>
+            <input type="text" id="outputType" name="outputType" required>
+
+            <button type="button" id="createButton">Create</button>
+        </form>
+        <div id="navigation" class="navigation"></div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const pages = [];
+
+        function createPage(machineName, inputMaterial, numOutputs, outputType) {
+            const page = {
+                id: pages.length + 1,
+                machineName,
+                inputMaterial,
+                numOutputs,
+                outputType,
+                nextPage: null,
+                prevPage: null
+            };
+
+            if (pages.length > 0) {
+                const prevPage = pages[pages.length - 1];
+                prevPage.nextPage = page.id;
+                page.prevPage = prevPage.id;
+            }
+
+            pages.push(page);
+            return page.id;
+        }
+
+        function renderPage(id) {
+            const page = pages.find(p => p.id === id);
+            if (!page) return;
+
+            document.getElementById('machineName').value = page.machineName;
+            document.getElementById('inputMaterial').value = page.inputMaterial;
+            document.getElementById('numOutputs').value = page.numOutputs;
+            document.getElementById('outputType').value = page.outputType;
+
+            const navigation = document.getElementById('navigation');
+            navigation.innerHTML = '';
+
+            if (page.prevPage) {
+                const prevLink = document.createElement('a');
+                prevLink.href = '#';
+                prevLink.innerText = 'Previous Step';
+                prevLink.onclick = () => renderPage(page.prevPage);
+                navigation.appendChild(prevLink);
+            }
+
+            if (page.nextPage) {
+                const nextLink = document.createElement('a');
+                nextLink.href = '#';
+                nextLink.innerText = 'Next Step';
+                nextLink.onclick = () => renderPage(page.nextPage);
+                navigation.appendChild(nextLink);
+            }
+        }
+
+        document.getElementById('createButton').addEventListener('click', () => {
+            const machineName = document.getElementById('machineName').value;
+            const inputMaterial = document.getElementById('inputMaterial').value;
+            const numOutputs = parseInt(document.getElementById('numOutputs').value, 10);
+            const outputType = document.getElementById('outputType').value;
+
+            if (!machineName || !inputMaterial || !numOutputs || !outputType) {
+                alert('All fields are mandatory.');
+                return;
+            }
+
+            for (let i = 0; i < numOutputs; i++) {
+                const pageId = createPage(machineName, inputMaterial, 1, outputType);
+                console.log(`Created Page ID: ${pageId}`);
+            }
+
+            renderPage(currentPage);
+        });
+
+        // Initialize first page
+        createPage('Initial Machine', 'Mixed Waste', 1, 'Sorted Material');
+        renderPage(currentPage);
+    </script>
 </body>
 </html>
