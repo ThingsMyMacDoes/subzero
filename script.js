@@ -1,22 +1,28 @@
 
-const { Canvas } = window['diagram-js'];
+import Diagram from 'diagram-js';
 
-// Initialize Canvas
-const canvas = new Canvas({
-  container: document.getElementById('canvas'),
+const diagram = new Diagram({
+  canvas: {
+    container: document.getElementById('canvas'),
+  },
 });
 
+const canvas = diagram.get('canvas');
 let nodeId = 1;
 
 // Function to add a node
 function addNode(name, x, y) {
   const node = {
     id: `node-${nodeId++}`,
-    label: name,
+    type: 'shape',
     x,
     y,
+    width: 100,
+    height: 50,
+    businessObject: { name },
   };
-  // For simplicity, represent a node as an object (expand with Diagram.js specifics).
+
+  canvas.addShape(node);
   return node;
 }
 
@@ -24,9 +30,12 @@ function addNode(name, x, y) {
 function connectNodes(source, target) {
   const connection = {
     id: `connection-${source.id}-${target.id}`,
-    source: source.id,
-    target: target.id,
+    type: 'connection',
+    source: source,
+    target: target,
   };
+
+  canvas.addConnection(connection);
   return connection;
 }
 
@@ -35,7 +44,7 @@ document.getElementById('machineForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
   const machineName = document.getElementById('machineName').value;
-  const numOutputs = parseInt(document.getElementById('numOutputs').value);
+  const numOutputs = parseInt(document.getElementById('numOutputs').value, 10);
   const outputTypes = document.getElementById('outputTypes').value.split(',');
 
   if (numOutputs !== outputTypes.length) {
@@ -50,12 +59,11 @@ document.getElementById('machineForm').addEventListener('submit', (e) => {
   const outputNodes = [];
   const connections = [];
   outputTypes.forEach((type, index) => {
-    const outputNode = addNode(type.trim(), 400 + index * 100, 200);
+    const outputNode = addNode(type.trim(), 400 + index * 150, 200);
     outputNodes.push(outputNode);
     connections.push(connectNodes(machineNode, outputNode));
   });
 
-  // Render nodes and connections (this part should use Diagram.js rendering logic).
   console.log('Machine Node:', machineNode);
   console.log('Output Nodes:', outputNodes);
   console.log('Connections:', connections);
