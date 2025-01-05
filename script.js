@@ -1,65 +1,62 @@
-let diagramData = "graph TD\n"; // Initialize diagram data
 
-// Function to draw the machine flowchart
-function drawFlowchart() {
-    // Define machine, input, and outputs
-    const machine1 = {
-        name: "Machine1",
-        input: "MixedWaste",
-        outputs: ["Metal", "Plastic"]
-    };
+const { Canvas } = window['diagram-js'];
 
-    const machine2 = {
-        name: "Machine2",
-        input: "Metal",
-        outputs: ["LargeMetal", "SmallMetal"]
-    };
+// Initialize Canvas
+const canvas = new Canvas({
+  container: document.getElementById('canvas'),
+});
 
-    const machine3 = {
-        name: "Machine3",
-        input: "Plastic",
-        outputs: ["LightPlastic", "DarkPlastic"]
-    };
+let nodeId = 1;
 
-    // Add first machine
-    const machine1Label = `${machine1.name}: ${machine1.input}`;
-    diagramData += `${machine1.name}[${machine1Label}]\n`;
-
-    // Add outputs for the first machine
-    const machine1Output1 = `${machine1.name}_output1`;
-    const machine1Output2 = `${machine1.name}_output2`;
-    diagramData += `${machine1.name} --> ${machine1Output1}[${machine1.name}: ${machine1.input} → ${machine1.outputs[0]}]\n`;
-    diagramData += `${machine1.name} --> ${machine1Output2}[${machine1.name}: ${machine1.input} → ${machine1.outputs[1]}]\n`;
-
-    // Add second machine (connected to first output of Machine1)
-    const machine2Label = `${machine2.name}: ${machine2.input}`;
-    diagramData += `${machine1Output1} --> ${machine2.name}[${machine2Label}]\n`;
-
-    // Add outputs for the second machine
-    const machine2Output1 = `${machine2.name}_output1`;
-    const machine2Output2 = `${machine2.name}_output2`;
-    diagramData += `${machine2.name} --> ${machine2Output1}[${machine2.name}: ${machine2.input} → ${machine2.outputs[0]}]\n`;
-    diagramData += `${machine2.name} --> ${machine2Output2}[${machine2.name}: ${machine2.input} → ${machine2.outputs[1]}]\n`;
-
-    // Add third machine (connected to second output of Machine1)
-    const machine3Label = `${machine3.name}: ${machine3.input}`;
-    diagramData += `${machine1Output2} --> ${machine3.name}[${machine3Label}]\n`;
-
-    // Add outputs for the third machine
-    const machine3Output1 = `${machine3.name}_output1`;
-    const machine3Output2 = `${machine3.name}_output2`;
-    diagramData += `${machine3.name} --> ${machine3Output1}[${machine3.name}: ${machine3.input} → ${machine3.outputs[0]}]\n`;
-    diagramData += `${machine3.name} --> ${machine3Output2}[${machine3.name}: ${machine3.input} → ${machine3.outputs[1]}]\n`;
-
-    renderDiagram();
+// Function to add a node
+function addNode(name, x, y) {
+  const node = {
+    id: `node-${nodeId++}`,
+    label: name,
+    x,
+    y,
+  };
+  // For simplicity, represent a node as an object (expand with Diagram.js specifics).
+  return node;
 }
 
-// Function to render the diagram
-function renderDiagram() {
-    const diagramContainer = document.getElementById("diagram");
-    diagramContainer.innerHTML = `<div class="mermaid">${diagramData}</div>`;
-    mermaid.init(undefined, diagramContainer);
+// Function to connect nodes
+function connectNodes(source, target) {
+  const connection = {
+    id: `connection-${source.id}-${target.id}`,
+    source: source.id,
+    target: target.id,
+  };
+  return connection;
 }
 
-// Draw the flowchart on page load
-drawFlowchart();
+// Handle form submission
+document.getElementById('machineForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const machineName = document.getElementById('machineName').value;
+  const numOutputs = parseInt(document.getElementById('numOutputs').value);
+  const outputTypes = document.getElementById('outputTypes').value.split(',');
+
+  if (numOutputs !== outputTypes.length) {
+    alert('Number of outputs must match the number of types.');
+    return;
+  }
+
+  // Add the main machine node
+  const machineNode = addNode(machineName, 200, 200);
+
+  // Add output nodes and connections
+  const outputNodes = [];
+  const connections = [];
+  outputTypes.forEach((type, index) => {
+    const outputNode = addNode(type.trim(), 400 + index * 100, 200);
+    outputNodes.push(outputNode);
+    connections.push(connectNodes(machineNode, outputNode));
+  });
+
+  // Render nodes and connections (this part should use Diagram.js rendering logic).
+  console.log('Machine Node:', machineNode);
+  console.log('Output Nodes:', outputNodes);
+  console.log('Connections:', connections);
+});
