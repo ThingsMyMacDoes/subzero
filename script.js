@@ -5,20 +5,20 @@ function drawFlowchart() {
     // Define machine, input, and outputs
     const machine1 = {
         name: "Machine1",
-        input: "Mixed Waste",
+        input: "MixedWaste",
         outputs: ["Metal", "Plastic"]
     };
 
     const machine2 = {
         name: "Machine2",
         input: "Metal",
-        outputs: ["Large Metal", "Small Metal"]
+        outputs: ["LargeMetal", "SmallMetal"]
     };
 
     const machine3 = {
         name: "Machine3",
         input: "Plastic",
-        outputs: ["Light Plastic", "Dark Plastic"]
+        outputs: ["LightPlastic", "DarkPlastic"]
     };
 
     // Add first machine
